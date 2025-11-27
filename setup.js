@@ -1,24 +1,14 @@
 // p5.js Project Setup
 // Main entry point for configuring p5.js version and delivery mode
 
-import { access } from 'fs/promises';
 import * as p from '@clack/prompts';
 import { FileManager } from './file/FileManager.js';
 import { VersionProvider } from './api/VersionProvider.js';
+import { ConfigManager } from './config/ConfigManager.js';
 
 const fileManager = new FileManager();
 const versionProvider = new VersionProvider('p5');
-
-async function loadConfig() {
-  // Check if config file exists
-  try {
-    await access('p5-config.json');
-    return await fileManager.readJSON('p5-config.json');
-  } catch (error) {
-    // Config doesn't exist
-    return null;
-  }
-}
+const configManager = new ConfigManager(fileManager);
 
 async function fetchVersions() {
   // Fetch available p5.js versions from API
@@ -72,20 +62,6 @@ async function downloadTypes(version) {
   return typeDefsVersion;
 }
 
-async function saveConfig(version, mode = 'cdn', typeDefsVersion = null) {
-  // Create configuration object
-  const config = {
-    version,
-    mode,
-    typeDefsVersion,
-    lastUpdated: new Date().toISOString()
-  };
-
-  // Write to p5-config.json
-  await fileManager.writeJSON('p5-config.json', config);
-
-  console.log('✓ Configuration saved to p5-config.json');
-}
 
 async function updateHTML(version, mode) {
   // Read index.html
@@ -112,7 +88,7 @@ async function main() {
   p.intro('p5.js Project Setup');
 
   // Load existing config if it exists
-  const config = await loadConfig();
+  const config = await configManager.load();
 
   let selectedVersion;
 
@@ -172,7 +148,8 @@ async function main() {
   const typeDefsVersion = await downloadTypes(selectedVersion);
 
   await updateHTML(selectedVersion, selectedMode);
-  await saveConfig(selectedVersion, selectedMode, typeDefsVersion);
+  await configManager.save(selectedVersion, selectedMode, typeDefsVersion);
+  console.log('✓ Configuration saved to p5-config.json');
 
   p.outro('Setup complete! Run "npm run serve" to start coding.');
 }

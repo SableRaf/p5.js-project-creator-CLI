@@ -4,8 +4,10 @@
 import { access } from 'fs/promises';
 import * as p from '@clack/prompts';
 import { FileManager } from './file/FileManager.js';
+import { VersionProvider } from './api/VersionProvider.js';
 
 const fileManager = new FileManager();
+const versionProvider = new VersionProvider('p5');
 
 async function loadConfig() {
   // Check if config file exists
@@ -19,12 +21,9 @@ async function loadConfig() {
 }
 
 async function fetchVersions() {
-  // Fetch available p5.js versions from jsdelivr API
-  const response = await fetch('https://data.jsdelivr.com/v1/package/npm/p5');
-  const data = await response.json();
+  // Fetch available p5.js versions from API
+  const versions = await versionProvider.getVersions();
 
-  // Extract and return versions array
-  const versions = data.versions;
   console.log('Available p5.js versions:', versions.slice(0, 10)); // Log first 10
   console.log(`Total versions available: ${versions.length}`);
 
@@ -56,9 +55,7 @@ async function downloadTypes(version) {
     console.log(`Type definitions for version ${version} not found, using latest...`);
 
     // Fetch latest version of @types/p5
-    const apiResponse = await fetch('https://data.jsdelivr.com/v1/package/npm/@types/p5');
-    const apiData = await apiResponse.json();
-    typeDefsVersion = apiData.tags.latest;
+    typeDefsVersion = await versionProvider.getLatestForPackage('@types/p5');
 
     // Download latest version
     url = `https://cdn.jsdelivr.net/npm/@types/p5@${typeDefsVersion}/index.d.ts`;

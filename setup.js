@@ -87,6 +87,21 @@ async function updateHTML(version, mode) {
 }
 
 async function main() {
+    // Ensure sketch directory and required files exist
+    await fileManager.createDir(basePath);
+    const requiredFiles = [
+      { name: 'index.html', content: `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <script src=\"https://cdn.jsdelivr.net/npm/p5@2.1.0/lib/p5.js\"></script>\n  <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n</head>\n<body>\n  <main></main>\n  <script src=\"sketch.js\"></script>\n</body>\n</html>\n` },
+      { name: 'sketch.js', content: `function setup() {\n  createCanvas(400, 400);\n  background(220);\n}\n\nfunction draw() {\n  circle(mouseX, mouseY, 20);\n}\n` },
+      { name: 'style.css', content: `html, body {\n  margin: 0;\n  padding: 0;\n}\n\ncanvas {\n  display: block;\n}\n` }
+    ];
+    for (const file of requiredFiles) {
+      const filePath = `${basePath}${file.name}`;
+      const exists = await fileManager.exists(filePath);
+      if (!exists) {
+        await fileManager.writeHTML(filePath, file.content);
+        console.log(`✓ Created missing file: ${filePath}`);
+      }
+    }
   promptProvider.intro('p5.js Project Setup');
 
   // Load existing config if it exists

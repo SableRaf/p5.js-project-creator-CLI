@@ -17,6 +17,21 @@ async function fetchVersions() {
   return versions;
 }
 
+async function saveConfig(version, mode = 'cdn') {
+  // Create configuration object
+  const config = {
+    version,
+    mode,
+    typeDefsVersion: null, // Will be added later
+    lastUpdated: new Date().toISOString()
+  };
+
+  // Write to p5-config.json
+  await writeFile('p5-config.json', JSON.stringify(config, null, 2), 'utf-8');
+
+  console.log('✓ Configuration saved to p5-config.json');
+}
+
 async function updateHTML(version) {
   // Read index.html
   const htmlPath = 'index.html';
@@ -61,6 +76,7 @@ async function main() {
   }
 
   await updateHTML(selectedVersion);
+  await saveConfig(selectedVersion, 'cdn');
 
   p.outro('Setup complete! Run "npm run serve" to start coding.');
 }

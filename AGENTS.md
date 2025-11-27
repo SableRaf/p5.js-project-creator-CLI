@@ -4,13 +4,13 @@ When working on this project, please follow these guidelines to ensure consisten
 
 ## Where to start
 
-Begin by reviewing the `README.md` file, 
+Begin by reviewing the `README.md` file, if present, to understand the project's purpose and setup instructions. 
 
-If present, to understand the project's purpose and setup instructions. Next, familiarize yourself with the `PRD.md` for product requirements and `STEPS.md` for the incremental development plan.
+Next, familiarize yourself with the `PRD.md` for product requirements and `STEPS.md` for the incremental development plan.
 
-If no `PRD.md` file exists, ask the user for the product requirements document (PRD) content to guide the development plan, or discuss the project goals and features together with them to create one.
+   - If no `PRD.md` file exists, ask the user for the product requirements document (PRD) content to guide the development plan, or discuss the project goals and features together with them to create one.
 
-If no `STEPS.md` file exists, refer to the template below to create a structured development plan and save it as `STEPS.md` in the project root.
+   - If no `STEPS.md` file exists, refer to the template below to create a structured development plan and save it as `STEPS.md` in the project root.
 
 After the initial setup, based on feedback and evolving requirements, you may need to extend or modify the development plan. Refer to the "Iteration Workflows" section below for guidance on managing these changes.
 

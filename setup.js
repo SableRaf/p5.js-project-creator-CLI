@@ -63,13 +63,18 @@ async function saveConfig(version, mode = 'cdn') {
   console.log('✓ Configuration saved to p5-config.json');
 }
 
-async function updateHTML(version) {
+async function updateHTML(version, mode) {
   // Read index.html
   const htmlPath = 'index.html';
   const htmlContent = await readFile(htmlPath, 'utf-8');
 
-  // Create CDN script tag with selected version
-  const scriptTag = `<script src="https://cdn.jsdelivr.net/npm/p5@${version}/lib/p5.js"></script>`;
+  // Create script tag based on mode
+  let scriptTag;
+  if (mode === 'cdn') {
+    scriptTag = `<script src="https://cdn.jsdelivr.net/npm/p5@${version}/lib/p5.js"></script>`;
+  } else {
+    scriptTag = `<script src="lib/p5.js"></script>`;
+  }
 
   // Replace marker with script tag
   const updatedHTML = htmlContent.replace('<!-- P5JS_SCRIPT_TAG -->', scriptTag);
@@ -77,7 +82,7 @@ async function updateHTML(version) {
   // Write back to file
   await writeFile(htmlPath, updatedHTML, 'utf-8');
 
-  console.log(`✓ Updated index.html with p5.js ${version} CDN link`);
+  console.log(`✓ Updated index.html with p5.js ${version} (${mode} mode)`);
 }
 
 async function main() {
@@ -121,8 +126,27 @@ async function main() {
     process.exit(0);
   }
 
-  await updateHTML(selectedVersion);
-  await saveConfig(selectedVersion, 'cdn');
+  // Let user select delivery mode
+  const selectedMode = await p.select({
+    message: 'Choose delivery mode:',
+    options: [
+      { value: 'cdn', label: 'CDN (jsdelivr)' },
+      { value: 'local', label: 'Local (download to lib/)' }
+    ],
+  });
+
+  if (p.isCancel(selectedMode)) {
+    p.cancel('Setup cancelled');
+    process.exit(0);
+  }
+
+  // Download p5.js if local mode
+  if (selectedMode === 'local') {
+    await downloadP5(selectedVersion);
+  }
+
+  await updateHTML(selectedVersion, selectedMode);
+  await saveConfig(selectedVersion, selectedMode);
 
   p.outro('Setup complete! Run "npm run serve" to start coding.');
 }

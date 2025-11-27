@@ -38,7 +38,7 @@ async function downloadP5(version) {
 
 async function downloadTypes(version) {
   // Create types directory if it doesn't exist
-  await fileManager.createDir('types');
+  await fileManager.createDir(`${basePath}types`);  
 
   // Try to download @types/p5 matching the p5.js version
   let url = `https://cdn.jsdelivr.net/npm/@types/p5@${version}/global.d.ts`;
@@ -52,7 +52,7 @@ async function downloadTypes(version) {
     // Fetch latest version of @types/p5
     typeDefsVersion = await versionProvider.getLatestForPackage('@types/p5');
 
-    // Download latest version
+    // Download latest version  
     url = `https://cdn.jsdelivr.net/npm/@types/p5@${typeDefsVersion}/global.d.ts`;
     response = await fileManager.downloadFileWithCheck(url);
   }
@@ -180,7 +180,7 @@ async function main() {
 
   await updateHTML(selectedVersion, selectedMode);
   await configManager.save(selectedVersion, selectedMode, typeDefsVersion);
-  console.log('✓ Configuration saved to p5-config.json');
+  console.log(`✓ Configuration saved to \`${basePath}p5-config.json\`` );
 
   promptProvider.outro('Setup complete! Run "npm run serve" to start coding.');
 }

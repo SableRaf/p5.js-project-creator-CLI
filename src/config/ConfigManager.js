@@ -1,8 +1,10 @@
 // ConfigManager - Handles project configuration
 import { access } from 'fs/promises';
 
+const basePath = 'sketch/';
+
 export class ConfigManager {
-  constructor(fileManager, configPath = 'p5-config.json') {
+  constructor(fileManager, configPath = `${basePath}p5-config.json`) {
     this.fileManager = fileManager;
     this.configPath = configPath;
   }

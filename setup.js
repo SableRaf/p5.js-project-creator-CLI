@@ -1,7 +1,7 @@
 // p5.js Project Setup
 // Main entry point for configuring p5.js version and delivery mode
 
-import { readFile, writeFile, access } from 'fs/promises';
+import { readFile, writeFile, access, mkdir } from 'fs/promises';
 import * as p from '@clack/prompts';
 
 async function loadConfig() {
@@ -27,6 +27,25 @@ async function fetchVersions() {
   console.log(`Total versions available: ${versions.length}`);
 
   return versions;
+}
+
+async function downloadP5(version) {
+  // Create lib directory if it doesn't exist
+  try {
+    await mkdir('lib', { recursive: true });
+  } catch (error) {
+    // Directory already exists, ignore
+  }
+
+  // Download p5.js from jsdelivr CDN
+  const url = `https://cdn.jsdelivr.net/npm/p5@${version}/lib/p5.js`;
+  const response = await fetch(url);
+  const p5Code = await response.text();
+
+  // Save to lib/p5.js
+  await writeFile('lib/p5.js', p5Code, 'utf-8');
+
+  console.log(`✓ Downloaded p5.js ${version} to lib/p5.js`);
 }
 
 async function saveConfig(version, mode = 'cdn') {

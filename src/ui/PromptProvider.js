@@ -1,6 +1,8 @@
 // PromptProvider - Handles all user prompts and interactions
 import * as p from '@clack/prompts';
 
+const basePath = 'sketch/';
+
 export class PromptProvider {
   /**
    * Show intro message
@@ -62,7 +64,7 @@ export class PromptProvider {
       message: 'Choose delivery mode:',
       options: [
         { value: 'cdn', label: 'CDN (jsdelivr)' },
-        { value: 'local', label: 'Local (download to lib/)' }
+        { value: 'local', label: `Local (download to ${basePath}lib/)` }
       ],
     });
   }

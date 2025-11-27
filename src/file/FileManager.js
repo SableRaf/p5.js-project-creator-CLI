@@ -2,18 +2,20 @@
 import { readFile, writeFile, mkdir, access, rm, readdir } from 'fs/promises';
 import { constants } from 'fs';
 
+const basePath = 'sketch/';
+
 export class FileManager {
   /**
    * Read HTML file content
    */
-  async readHTML(path = 'index.html') {
+  async readHTML(path = `${basePath}index.html`) {
     return await readFile(path, 'utf-8');
   }
 
   /**
    * Write HTML file content
    */
-  async writeHTML(path = 'index.html', content) {
+  async writeHTML(path = `${basePath}index.html`, content) {
     await writeFile(path, content, 'utf-8');
   }
 

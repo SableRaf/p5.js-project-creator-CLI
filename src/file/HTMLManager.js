@@ -1,6 +1,8 @@
 // HTMLManager - Handles HTML DOM manipulation using linkedom
 import { parseHTML } from 'linkedom';
 
+const basePath = 'sketch/';
+
 export class HTMLManager {
   /**
    * CDN URL patterns for p5.js
@@ -63,7 +65,7 @@ export class HTMLManager {
     const file = preferences.isMinified ? 'p5.min.js' : 'p5.js';
 
     if (mode === 'local') {
-      return `lib/${file}`;
+      return `${basePath}lib/${file}`;
     }
 
     const cdn = preferences.cdnProvider || 'jsdelivr';

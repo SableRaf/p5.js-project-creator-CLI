@@ -1,0 +1,6 @@
+{
+  "include": [
+    "*.js",
+    "global.d.ts"
+  ]
+}

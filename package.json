@@ -4,11 +4,8 @@
   "type": "module",
   "scripts": {
     "setup": "node setup.js",
-    "setup:verbose": "node setup.js -- --verbose",
     "update": "node setup.js",
-    "update:verbose": "node setup.js -- --verbose",
-    "serve": "npx serve ./sketch",
-    "test:dry-run": "node scripts/dry-run.js"
+    "serve": "npx serve ./sketch"
   },
   "devDependencies": {
     "@clack/prompts": "^0.11.0",

@@ -1,8 +1,20 @@
 // p5.js Project Setup
 // Main entry point for configuring p5.js version and delivery mode
 
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile, access } from 'fs/promises';
 import * as p from '@clack/prompts';
+
+async function loadConfig() {
+  // Check if config file exists
+  try {
+    await access('p5-config.json');
+    const configData = await readFile('p5-config.json', 'utf-8');
+    return JSON.parse(configData);
+  } catch (error) {
+    // Config doesn't exist
+    return null;
+  }
+}
 
 async function fetchVersions() {
   // Fetch available p5.js versions from jsdelivr API
@@ -52,20 +64,35 @@ async function updateHTML(version) {
 async function main() {
   p.intro('p5.js Project Setup');
 
-  const ready = await p.confirm({
-    message: 'Ready to setup?'
-  });
+  // Load existing config if it exists
+  const config = await loadConfig();
 
-  if (p.isCancel(ready) || !ready) {
-    p.cancel('Setup cancelled');
-    process.exit(0);
+  let selectedVersion;
+
+  if (config) {
+    // Show current configuration
+    p.note(`Current: p5.js ${config.version} (${config.mode} mode)`, 'Existing Configuration');
+
+    const changeConfig = await p.confirm({
+      message: 'Do you want to change the version?'
+    });
+
+    if (p.isCancel(changeConfig)) {
+      p.cancel('Setup cancelled');
+      process.exit(0);
+    }
+
+    if (!changeConfig) {
+      p.outro('Keeping current configuration.');
+      process.exit(0);
+    }
   }
 
   // Fetch available versions
   const versions = await fetchVersions();
 
   // Let user select a version
-  const selectedVersion = await p.select({
+  selectedVersion = await p.select({
     message: 'Select p5.js version:',
     options: versions.slice(0, 15).map(v => ({ value: v, label: v })),
   });

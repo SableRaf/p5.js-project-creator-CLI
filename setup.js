@@ -17,13 +17,13 @@ async function fetchVersions() {
   return versions;
 }
 
-async function updateHTML() {
+async function updateHTML(version) {
   // Read index.html
   const htmlPath = 'index.html';
   const htmlContent = await readFile(htmlPath, 'utf-8');
 
-  // Hardcoded p5.js CDN link (version 2.1.1)
-  const scriptTag = '<script src="https://cdn.jsdelivr.net/npm/p5@2.1.1/lib/p5.js"></script>';
+  // Create CDN script tag with selected version
+  const scriptTag = `<script src="https://cdn.jsdelivr.net/npm/p5@${version}/lib/p5.js"></script>`;
 
   // Replace marker with script tag
   const updatedHTML = htmlContent.replace('<!-- P5JS_SCRIPT_TAG -->', scriptTag);
@@ -31,7 +31,7 @@ async function updateHTML() {
   // Write back to file
   await writeFile(htmlPath, updatedHTML, 'utf-8');
 
-  console.log('✓ Updated index.html with p5.js 2.1.1 CDN link');
+  console.log(`✓ Updated index.html with p5.js ${version} CDN link`);
 }
 
 async function main() {
@@ -49,7 +49,18 @@ async function main() {
   // Fetch available versions
   const versions = await fetchVersions();
 
-  await updateHTML();
+  // Let user select a version
+  const selectedVersion = await p.select({
+    message: 'Select p5.js version:',
+    options: versions.slice(0, 15).map(v => ({ value: v, label: v })),
+  });
+
+  if (p.isCancel(selectedVersion)) {
+    p.cancel('Setup cancelled');
+    process.exit(0);
+  }
+
+  await updateHTML(selectedVersion);
 
   p.outro('Setup complete! Run "npm run serve" to start coding.');
 }

@@ -15,15 +15,18 @@ const promptProvider = new PromptProvider();
 
 const basePath = 'sketch/';
 
-  // Check for verbose flag (e.g. --verbose)
-  const verbose = process.argv.includes('--verbose');
+// Check for verbose flag (supports both direct Node and npm scripts)
+const verbose = process.argv.includes('--verbose') || 
+                process.env.npm_config_verbose === 'true';
 
 async function fetchVersions() {
   // Fetch available p5.js versions from API
   const versions = await versionProvider.getVersions();
 
-  // console.log('Available p5.js versions:', versions.slice(0, 10)); // Log first 10
-  // console.log(`Total versions available: ${versions.length}`);
+  if (verbose) {
+    console.log(`Total versions available: ${versions.length}`);
+    console.log('Showing most recent versions...');
+  }
 
   return versions;
 }

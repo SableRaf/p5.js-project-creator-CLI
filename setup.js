@@ -15,17 +15,20 @@ const promptProvider = new PromptProvider();
 
 const basePath = 'sketch/';
 
+  // Check for verbose flag (e.g. --verbose)
+  const verbose = process.argv.includes('--verbose');
+
 async function fetchVersions() {
   // Fetch available p5.js versions from API
   const versions = await versionProvider.getVersions();
 
-  console.log('Available p5.js versions:', versions.slice(0, 10)); // Log first 10
-  console.log(`Total versions available: ${versions.length}`);
+  // console.log('Available p5.js versions:', versions.slice(0, 10)); // Log first 10
+  // console.log(`Total versions available: ${versions.length}`);
 
   return versions;
 }
 
-async function downloadP5(version) {
+async function downloadP5(version, verbose = false) {
   // Create lib directory if it doesn't exist
   await fileManager.createDir(`${basePath}lib`);
 
@@ -33,12 +36,14 @@ async function downloadP5(version) {
   const url = `https://cdn.jsdelivr.net/npm/p5@${version}/lib/p5.js`;
   await fileManager.downloadFile(url, `${basePath}lib/p5.js`);
 
-  console.log(`✓ Downloaded p5.js ${version} to ${basePath}lib/p5.js`);
+  if (verbose) {
+    console.log(`✓ Downloaded p5.js ${version} to ${basePath}lib/p5.js`);
+  }
 }
 
-async function downloadTypes(version) {
+async function downloadTypes(version, verbose = false) {
   // Create types directory if it doesn't exist
-  await fileManager.createDir(`${basePath}types`);  
+  await fileManager.createDir(`${basePath}types`);
 
   // Try to download @types/p5 matching the p5.js version
   let url = `https://cdn.jsdelivr.net/npm/@types/p5@${version}/global.d.ts`;
@@ -47,12 +52,12 @@ async function downloadTypes(version) {
 
   // If version not found, fallback to latest
   if (!response.ok) {
-    console.log(`Type definitions for version ${version} not found, using latest...`);
-
+    if (verbose) {
+      console.log(`Type definitions for version ${version} not found, using latest...`);
+    }
     // Fetch latest version of @types/p5
     typeDefsVersion = await versionProvider.getLatestForPackage('@types/p5');
-
-    // Download latest version  
+    // Download latest version
     url = `https://cdn.jsdelivr.net/npm/@types/p5@${typeDefsVersion}/global.d.ts`;
     response = await fileManager.downloadFileWithCheck(url);
   }
@@ -62,13 +67,14 @@ async function downloadTypes(version) {
   // Save to types/global.d.ts
   await fileManager.writeHTML(`${basePath}types/global@${typeDefsVersion}.d.ts`, typeDefs);
 
-  console.log(`✓ Downloaded type definitions (${typeDefsVersion}) to types/global.d.ts`);
+  if (verbose) {
+    console.log(`✓ Downloaded type definitions (${typeDefsVersion}) to types/global.d.ts`);
+  }
 
   return typeDefsVersion;
 }
 
-
-async function updateHTML(version, mode) {
+async function updateHTML(version, mode, verbose = false) {
   // Read index.html
   const htmlContent = await fileManager.readHTML();
 
@@ -79,10 +85,14 @@ async function updateHTML(version, mode) {
   await fileManager.writeHTML(`${basePath}index.html`, result.html);
 
   if (result.updated) {
-    console.log(`✓ Updated index.html with p5.js ${version} (${mode} mode)`);
-    console.log(`  Method: ${result.method}`);
+    if (verbose) {
+      console.log(`✓ Updated index.html with p5.js ${version} (${mode} mode)`);
+      console.log(`      Method: ${result.method}`);
+    }
   } else {
-    console.warn('⚠ Warning: Could not update index.html');
+    if (verbose) {
+      console.warn('⚠ Warning: Could not update index.html');
+    }
   }
 }
 
@@ -92,7 +102,8 @@ async function main() {
     const requiredFiles = [
       { name: 'index.html', content: `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <script src=\"https://cdn.jsdelivr.net/npm/p5@2.1.0/lib/p5.js\"></script>\n  <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n</head>\n<body>\n  <main></main>\n  <script src=\"sketch.js\"></script>\n</body>\n</html>\n` },
       { name: 'sketch.js', content: `function setup() {\n  createCanvas(400, 400);\n  background(220);\n}\n\nfunction draw() {\n  circle(mouseX, mouseY, 20);\n}\n` },
-      { name: 'style.css', content: `html, body {\n  margin: 0;\n  padding: 0;\n}\n\ncanvas {\n  display: block;\n}\n` }
+      { name: 'style.css', content: `html, body {\n  margin: 0;\n  padding: 0;\n}\n\ncanvas {\n  display: block;\n}\n` },
+      { name: 'jsconfig.json', content: `{\n  "compilerOptions": {\n    "target": "ES6"\n  },\n  "include": [\n    "*.js",\n    "types/*.d.ts"\n  ]\n}` },
     ];
     for (const file of requiredFiles) {
       const filePath = `${basePath}${file.name}`;
@@ -160,10 +171,12 @@ async function main() {
 
       if (exists) {
         const deleted = await fileManager.deleteFile(p5Path);
-        if (deleted) console.log(`✓ Deleted local file \`${basePath}lib/p5.js\``);
-        else console.warn(`⚠ Could not delete \`${basePath}lib/p5.js\``);
+        if(verbose) {
+          if (deleted) console.log(`✓ Deleted local file \`${basePath}lib/p5.js\``);
+          else if (!deleted) console.warn(`⚠ Could not delete \`${basePath}lib/p5.js\``);
+        }
       } else {
-        console.log(`No local \`${basePath}lib/p5.js\` found to delete.`);
+        if (verbose) console.log(`No local \`${basePath}lib/p5.js\` found to delete.`);
       }
 
       // If lib directory is now empty, ask to delete it
@@ -178,8 +191,10 @@ async function main() {
 
         if (confirmDeleteLib) {
           const removed = await fileManager.deleteDir(`${basePath}lib`);
-          if (removed) console.log(`✓ Deleted \`${basePath}lib\` folder`);
-          else console.warn(`⚠ Could not delete \`${basePath}lib\` folder`);
+          if (verbose) {
+            if (removed) console.log(`✓ Deleted \`${basePath}lib\` folder`);
+            else console.warn(`⚠ Could not delete \`${basePath}lib\` folder`);
+          }
         }
       }
     }
@@ -187,17 +202,19 @@ async function main() {
 
   // Download p5.js if local mode
   if (selectedMode === 'local') {
-    await downloadP5(selectedVersion);
+    await downloadP5(selectedVersion, verbose);
   }
 
   // Download type definitions (returns actual version downloaded)
-  const typeDefsVersion = await downloadTypes(selectedVersion);
+  const typeDefsVersion = await downloadTypes(selectedVersion, verbose);
 
-  await updateHTML(selectedVersion, selectedMode);
+  await updateHTML(selectedVersion, selectedMode, verbose);
   await configManager.save(selectedVersion, selectedMode, typeDefsVersion);
-  console.log(`✓ Configuration saved to \`${basePath}p5-config.json\`` );
+  if (verbose) {
+    console.log(`✓ Configuration saved to \`${basePath}p5-config.json\`` );
+  }
 
-  promptProvider.outro('Setup complete! Run "npm run serve" to start coding.');
+  promptProvider.outro('Setup complete! Run "npm run serve" to run a local server and open sketch/sketch.js to start coding.');
 }
 
 main().catch(console.error);

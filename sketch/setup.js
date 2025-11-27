@@ -1,11 +1,11 @@
 // p5.js Project Setup
 // Main entry point for configuring p5.js version and delivery mode
 
-import { FileManager } from './file/FileManager.js';
-import { HTMLManager } from './file/HTMLManager.js';
-import { VersionProvider } from './api/VersionProvider.js';
-import { ConfigManager } from './config/ConfigManager.js';
-import { PromptProvider } from './ui/PromptProvider.js';
+import { FileManager } from './src/file/FileManager.js';
+import { HTMLManager } from './src/file/HTMLManager.js';
+import { VersionProvider } from './src/api/VersionProvider.js';
+import { ConfigManager } from './src/config/ConfigManager.js';
+import { PromptProvider } from './src/ui/PromptProvider.js';
 
 const fileManager = new FileManager();
 const htmlManager = new HTMLManager();

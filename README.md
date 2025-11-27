@@ -56,24 +56,27 @@ The tool will show your current configuration and ask if you want to change it.
 
 ```
 .
-├── api/
-│   └── VersionProvider.js      # Fetches versions from jsdelivr
-├── config/
-│   └── ConfigManager.js         # Manages p5-config.json
-├── file/
-│   └── FileManager.js           # Handles file operations
-├── ui/
-│   └── PromptProvider.js        # Interactive prompts
-├── lib/                         # p5.js files (local mode only)
-├── types/
-│   └── global.d.ts              # TypeScript definitions
-├── index.html                   # Main HTML file
-├── sketch.js                    # Your p5.js sketch
-├── style.css                    # Styles
-├── jsconfig.json                # IntelliSense configuration
-├── p5-config.json               # Project configuration
+├── sketch/
+│   ├── index.html               # Main HTML file
+│   ├── sketch.js                # Your p5.js sketch
+│   ├── style.css                # Styles
+│   ├── jsconfig.json            # IntelliSense configuration
+│   ├── p5-config.json           # Project configuration
+│   └── types/
+│       └── global.d.ts          # TypeScript definitions
+├── src/
+│   ├── api/
+│   │   └── VersionProvider.js   # Fetches versions from jsdelivr
+│   ├── config/
+│   │   └── ConfigManager.js     # Manages p5-config.json
+│   ├── file/
+│   │   ├── FileManager.js       # Handles file operations
+│   │   └── HTMLManager.js       # Handles HTML manipulation
+│   └── ui/
+│       └── PromptProvider.js    # Interactive prompts
 ├── setup.js                     # Setup script entry point
-└── package.json
+├── package.json
+└── README.md
 ```
 
 ## Configuration File

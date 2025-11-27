@@ -5,7 +5,7 @@
 
 import { mkdir, writeFile, rm, rmdir } from 'fs/promises';
 import { spawn } from 'child_process';
-import { FileManager } from '../file/FileManager.js';
+import { FileManager } from '../src/file/FileManager.js';
 
 async function setupTemp() {
   // create test-temp/lib and a dummy p5.js

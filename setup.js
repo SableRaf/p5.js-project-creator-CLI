@@ -4,6 +4,19 @@
 import { readFile, writeFile } from 'fs/promises';
 import * as p from '@clack/prompts';
 
+async function fetchVersions() {
+  // Fetch available p5.js versions from jsdelivr API
+  const response = await fetch('https://data.jsdelivr.com/v1/package/npm/p5');
+  const data = await response.json();
+
+  // Extract and return versions array
+  const versions = data.versions;
+  console.log('Available p5.js versions:', versions.slice(0, 10)); // Log first 10
+  console.log(`Total versions available: ${versions.length}`);
+
+  return versions;
+}
+
 async function updateHTML() {
   // Read index.html
   const htmlPath = 'index.html';
@@ -32,6 +45,9 @@ async function main() {
     p.cancel('Setup cancelled');
     process.exit(0);
   }
+
+  // Fetch available versions
+  const versions = await fetchVersions();
 
   await updateHTML();
 

@@ -1,15 +1,17 @@
 // p5.js Project Setup
 // Main entry point for configuring p5.js version and delivery mode
 
-import { readFile, writeFile, access, mkdir } from 'fs/promises';
+import { access } from 'fs/promises';
 import * as p from '@clack/prompts';
+import { FileManager } from './file/FileManager.js';
+
+const fileManager = new FileManager();
 
 async function loadConfig() {
   // Check if config file exists
   try {
     await access('p5-config.json');
-    const configData = await readFile('p5-config.json', 'utf-8');
-    return JSON.parse(configData);
+    return await fileManager.readJSON('p5-config.json');
   } catch (error) {
     // Config doesn't exist
     return null;
@@ -31,34 +33,22 @@ async function fetchVersions() {
 
 async function downloadP5(version) {
   // Create lib directory if it doesn't exist
-  try {
-    await mkdir('lib', { recursive: true });
-  } catch (error) {
-    // Directory already exists, ignore
-  }
+  await fileManager.createDir('lib');
 
   // Download p5.js from jsdelivr CDN
   const url = `https://cdn.jsdelivr.net/npm/p5@${version}/lib/p5.js`;
-  const response = await fetch(url);
-  const p5Code = await response.text();
-
-  // Save to lib/p5.js
-  await writeFile('lib/p5.js', p5Code, 'utf-8');
+  await fileManager.downloadFile(url, 'lib/p5.js');
 
   console.log(`✓ Downloaded p5.js ${version} to lib/p5.js`);
 }
 
 async function downloadTypes(version) {
   // Create types directory if it doesn't exist
-  try {
-    await mkdir('types', { recursive: true });
-  } catch (error) {
-    // Directory already exists, ignore
-  }
+  await fileManager.createDir('types');
 
   // Try to download @types/p5 matching the p5.js version
   let url = `https://cdn.jsdelivr.net/npm/@types/p5@${version}/index.d.ts`;
-  let response = await fetch(url);
+  let response = await fileManager.downloadFileWithCheck(url);
   let typeDefsVersion = version;
 
   // If version not found, fallback to latest
@@ -72,13 +62,13 @@ async function downloadTypes(version) {
 
     // Download latest version
     url = `https://cdn.jsdelivr.net/npm/@types/p5@${typeDefsVersion}/index.d.ts`;
-    response = await fetch(url);
+    response = await fileManager.downloadFileWithCheck(url);
   }
 
   const typeDefs = await response.text();
 
   // Save to types/global.d.ts
-  await writeFile('types/global.d.ts', typeDefs, 'utf-8');
+  await fileManager.writeHTML('types/global.d.ts', typeDefs);
 
   console.log(`✓ Downloaded type definitions (${typeDefsVersion}) to types/global.d.ts`);
 
@@ -95,15 +85,14 @@ async function saveConfig(version, mode = 'cdn', typeDefsVersion = null) {
   };
 
   // Write to p5-config.json
-  await writeFile('p5-config.json', JSON.stringify(config, null, 2), 'utf-8');
+  await fileManager.writeJSON('p5-config.json', config);
 
   console.log('✓ Configuration saved to p5-config.json');
 }
 
 async function updateHTML(version, mode) {
   // Read index.html
-  const htmlPath = 'index.html';
-  const htmlContent = await readFile(htmlPath, 'utf-8');
+  const htmlContent = await fileManager.readHTML();
 
   // Create script tag based on mode
   let scriptTag;
@@ -117,7 +106,7 @@ async function updateHTML(version, mode) {
   const updatedHTML = htmlContent.replace('<!-- P5JS_SCRIPT_TAG -->', scriptTag);
 
   // Write back to file
-  await writeFile(htmlPath, updatedHTML, 'utf-8');
+  await fileManager.writeHTML('index.html', updatedHTML);
 
   console.log(`✓ Updated index.html with p5.js ${version} (${mode} mode)`);
 }

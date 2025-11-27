@@ -1,1 +1,14 @@
+# Node.js dependencies
 node_modules/
+
+# Build output
+dist/
+types/
+lib/
+
+# LLM agent local files
+.claude/
+
+# OS specific files
+.DS_Store
+Thumbs.db

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(node setup.js:*)"
+      "Bash(node setup.js:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []

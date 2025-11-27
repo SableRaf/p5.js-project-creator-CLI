@@ -2,6 +2,7 @@
 // Main entry point for configuring p5.js version and delivery mode
 
 import { readFile, writeFile } from 'fs/promises';
+import * as p from '@clack/prompts';
 
 async function updateHTML() {
   // Read index.html
@@ -21,9 +22,20 @@ async function updateHTML() {
 }
 
 async function main() {
-  console.log('p5.js Project Setup\n');
+  p.intro('p5.js Project Setup');
+
+  const ready = await p.confirm({
+    message: 'Ready to setup?'
+  });
+
+  if (p.isCancel(ready) || !ready) {
+    p.cancel('Setup cancelled');
+    process.exit(0);
+  }
+
   await updateHTML();
-  console.log('\nSetup complete!');
+
+  p.outro('Setup complete! Run "npm run serve" to start coding.');
 }
 
 main().catch(console.error);

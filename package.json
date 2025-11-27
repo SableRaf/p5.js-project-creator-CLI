@@ -5,9 +5,11 @@
   "scripts": {
     "setup": "node setup.js",
     "update": "node setup.js",
-    "serve": "npx serve ."
+    "serve": "npx serve .",
+    "test:dry-run": "node scripts/dry-run.js"
   },
   "devDependencies": {
-    "@clack/prompts": "^0.11.0"
+    "@clack/prompts": "^0.11.0",
+    "linkedom": "^0.18.12"
   }
 }

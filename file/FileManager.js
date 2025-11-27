@@ -1,5 +1,6 @@
 // FileManager - Handles all file system operations
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { readFile, writeFile, mkdir, access, rm, readdir } from 'fs/promises';
+import { constants } from 'fs';
 
 export class FileManager {
   /**
@@ -24,6 +25,53 @@ export class FileManager {
       await mkdir(path, { recursive: true });
     } catch (error) {
       // Directory already exists, ignore
+    }
+  }
+
+  /**
+   * Check if a file or directory exists
+   */
+  async exists(path) {
+    try {
+      await access(path, constants.F_OK);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
+   * List directory contents (names)
+   */
+  async listDir(path) {
+    try {
+      return await readdir(path);
+    } catch (err) {
+      return [];
+    }
+  }
+
+  /**
+   * Delete a file
+   */
+  async deleteFile(path) {
+    try {
+      await rm(path, { force: true });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
+   * Delete a directory (recursively)
+   */
+  async deleteDir(path) {
+    try {
+      await rm(path, { recursive: true, force: true });
+      return true;
+    } catch (err) {
+      return false;
     }
   }
 

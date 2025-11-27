@@ -2,11 +2,13 @@
 // Main entry point for configuring p5.js version and delivery mode
 
 import { FileManager } from './file/FileManager.js';
+import { HTMLManager } from './file/HTMLManager.js';
 import { VersionProvider } from './api/VersionProvider.js';
 import { ConfigManager } from './config/ConfigManager.js';
 import { PromptProvider } from './ui/PromptProvider.js';
 
 const fileManager = new FileManager();
+const htmlManager = new HTMLManager();
 const versionProvider = new VersionProvider('p5');
 const configManager = new ConfigManager(fileManager);
 const promptProvider = new PromptProvider();
@@ -68,21 +70,18 @@ async function updateHTML(version, mode) {
   // Read index.html
   const htmlContent = await fileManager.readHTML();
 
-  // Create script tag based on mode
-  let scriptTag;
-  if (mode === 'cdn') {
-    scriptTag = `<script src="https://cdn.jsdelivr.net/npm/p5@${version}/lib/p5.js"></script>`;
-  } else {
-    scriptTag = `<script src="lib/p5.js"></script>`;
-  }
-
-  // Replace marker with script tag
-  const updatedHTML = htmlContent.replace('<!-- P5JS_SCRIPT_TAG -->', scriptTag);
+  // Update p5.js script tag using DOM parsing
+  const result = htmlManager.updateP5Script(htmlContent, version, mode);
 
   // Write back to file
-  await fileManager.writeHTML('index.html', updatedHTML);
+  await fileManager.writeHTML('index.html', result.html);
 
-  console.log(`✓ Updated index.html with p5.js ${version} (${mode} mode)`);
+  if (result.updated) {
+    console.log(`✓ Updated index.html with p5.js ${version} (${mode} mode)`);
+    console.log(`  Method: ${result.method}`);
+  } else {
+    console.warn('⚠ Warning: Could not update index.html');
+  }
 }
 
 async function main() {
@@ -127,6 +126,46 @@ async function main() {
   if (promptProvider.isCancel(selectedMode)) {
     promptProvider.cancel('Setup cancelled');
     process.exit(0);
+  }
+
+  // If switching from local to CDN, offer to delete the local copy
+  if (config && config.mode === 'local' && selectedMode !== 'local') {
+    const confirmDelete = await promptProvider.confirm('You are switching from local to CDN. Delete the local file `lib/p5.js`?');
+
+    if (promptProvider.isCancel(confirmDelete)) {
+      promptProvider.cancel('Setup cancelled');
+      process.exit(0);
+    }
+
+    if (confirmDelete) {
+      const p5Path = 'lib/p5.js';
+      const exists = await fileManager.exists(p5Path);
+
+      if (exists) {
+        const deleted = await fileManager.deleteFile(p5Path);
+        if (deleted) console.log('✓ Deleted local file `lib/p5.js`');
+        else console.warn('⚠ Could not delete `lib/p5.js`');
+      } else {
+        console.log('No local `lib/p5.js` found to delete.');
+      }
+
+      // If lib directory is now empty, ask to delete it
+      const libContents = await fileManager.listDir('lib');
+      if (!libContents || libContents.length === 0) {
+        const confirmDeleteLib = await promptProvider.confirm('The `lib` folder is empty. Delete the `lib` folder as well?');
+
+        if (promptProvider.isCancel(confirmDeleteLib)) {
+          promptProvider.cancel('Setup cancelled');
+          process.exit(0);
+        }
+
+        if (confirmDeleteLib) {
+          const removed = await fileManager.deleteDir('lib');
+          if (removed) console.log('✓ Deleted `lib` folder');
+          else console.warn('⚠ Could not delete `lib` folder');
+        }
+      }
+    }
   }
 
   // Download p5.js if local mode

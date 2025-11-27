@@ -391,6 +391,7 @@ canvas {
 
 ## Future Enhancements (Out of Scope)
 
+- Support for git initialization and remote repo setup
 - Support for p5.sound addon library
 - Multiple sketch files in one project
 - Build/bundle process for production

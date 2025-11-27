@@ -12,8 +12,8 @@ export class HTMLManager {
     /^https?:\/\/cdn\.jsdelivr\.net\/npm\/p5@([^/]+)\/lib\/p5\.(min\.)?js$/,
     /^https?:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/p5\.js\/([^/]+)\/p5\.(?:min\.)?js$/,
     /^https?:\/\/unpkg\.com\/p5@([^/]+)\/lib\/p5\.(min\.)?js$/,
-    /^sketch\/lib\/p5\.(min\.)?js$/,
-    /^lib\/p5\.(min\.)?js$/
+    /^sketch\/lib\/p5(?:@([^/]+))?\.(min\.)?js$/,
+    /^lib\/p5(?:@([^/]+))?\.(min\.)?js$/
   ];
 
   /**

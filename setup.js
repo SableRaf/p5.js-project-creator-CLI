@@ -56,24 +56,41 @@ async function downloadTypes(version) {
     // Directory already exists, ignore
   }
 
-  // Download @types/p5 from jsdelivr CDN
-  // For now, use the version as-is (will add fallback in next commit)
-  const url = `https://cdn.jsdelivr.net/npm/@types/p5@${version}/index.d.ts`;
-  const response = await fetch(url);
+  // Try to download @types/p5 matching the p5.js version
+  let url = `https://cdn.jsdelivr.net/npm/@types/p5@${version}/index.d.ts`;
+  let response = await fetch(url);
+  let typeDefsVersion = version;
+
+  // If version not found, fallback to latest
+  if (!response.ok) {
+    console.log(`Type definitions for version ${version} not found, using latest...`);
+
+    // Fetch latest version of @types/p5
+    const apiResponse = await fetch('https://data.jsdelivr.com/v1/package/npm/@types/p5');
+    const apiData = await apiResponse.json();
+    typeDefsVersion = apiData.tags.latest;
+
+    // Download latest version
+    url = `https://cdn.jsdelivr.net/npm/@types/p5@${typeDefsVersion}/index.d.ts`;
+    response = await fetch(url);
+  }
+
   const typeDefs = await response.text();
 
   // Save to types/global.d.ts
   await writeFile('types/global.d.ts', typeDefs, 'utf-8');
 
-  console.log(`✓ Downloaded type definitions to types/global.d.ts`);
+  console.log(`✓ Downloaded type definitions (${typeDefsVersion}) to types/global.d.ts`);
+
+  return typeDefsVersion;
 }
 
-async function saveConfig(version, mode = 'cdn') {
+async function saveConfig(version, mode = 'cdn', typeDefsVersion = null) {
   // Create configuration object
   const config = {
     version,
     mode,
-    typeDefsVersion: null, // Will be added later
+    typeDefsVersion,
     lastUpdated: new Date().toISOString()
   };
 
@@ -165,11 +182,11 @@ async function main() {
     await downloadP5(selectedVersion);
   }
 
-  // Download type definitions
-  await downloadTypes(selectedVersion);
+  // Download type definitions (returns actual version downloaded)
+  const typeDefsVersion = await downloadTypes(selectedVersion);
 
   await updateHTML(selectedVersion, selectedMode);
-  await saveConfig(selectedVersion, selectedMode);
+  await saveConfig(selectedVersion, selectedMode, typeDefsVersion);
 
   p.outro('Setup complete! Run "npm run serve" to start coding.');
 }

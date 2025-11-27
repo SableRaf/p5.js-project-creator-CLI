@@ -1,14 +1,15 @@
 // p5.js Project Setup
 // Main entry point for configuring p5.js version and delivery mode
 
-import * as p from '@clack/prompts';
 import { FileManager } from './file/FileManager.js';
 import { VersionProvider } from './api/VersionProvider.js';
 import { ConfigManager } from './config/ConfigManager.js';
+import { PromptProvider } from './ui/PromptProvider.js';
 
 const fileManager = new FileManager();
 const versionProvider = new VersionProvider('p5');
 const configManager = new ConfigManager(fileManager);
+const promptProvider = new PromptProvider();
 
 async function fetchVersions() {
   // Fetch available p5.js versions from API
@@ -85,7 +86,7 @@ async function updateHTML(version, mode) {
 }
 
 async function main() {
-  p.intro('p5.js Project Setup');
+  promptProvider.intro('p5.js Project Setup');
 
   // Load existing config if it exists
   const config = await configManager.load();
@@ -94,19 +95,17 @@ async function main() {
 
   if (config) {
     // Show current configuration
-    p.note(`Current: p5.js ${config.version} (${config.mode} mode)`, 'Existing Configuration');
+    promptProvider.note(`Current: p5.js ${config.version} (${config.mode} mode)`, 'Existing Configuration');
 
-    const changeConfig = await p.confirm({
-      message: 'Do you want to change the version?'
-    });
+    const changeConfig = await promptProvider.confirm('Do you want to change the version?');
 
-    if (p.isCancel(changeConfig)) {
-      p.cancel('Setup cancelled');
+    if (promptProvider.isCancel(changeConfig)) {
+      promptProvider.cancel('Setup cancelled');
       process.exit(0);
     }
 
     if (!changeConfig) {
-      p.outro('Keeping current configuration.');
+      promptProvider.outro('Keeping current configuration.');
       process.exit(0);
     }
   }
@@ -115,27 +114,18 @@ async function main() {
   const versions = await fetchVersions();
 
   // Let user select a version
-  selectedVersion = await p.select({
-    message: 'Select p5.js version:',
-    options: versions.slice(0, 15).map(v => ({ value: v, label: v })),
-  });
+  selectedVersion = await promptProvider.selectVersion(versions);
 
-  if (p.isCancel(selectedVersion)) {
-    p.cancel('Setup cancelled');
+  if (promptProvider.isCancel(selectedVersion)) {
+    promptProvider.cancel('Setup cancelled');
     process.exit(0);
   }
 
   // Let user select delivery mode
-  const selectedMode = await p.select({
-    message: 'Choose delivery mode:',
-    options: [
-      { value: 'cdn', label: 'CDN (jsdelivr)' },
-      { value: 'local', label: 'Local (download to lib/)' }
-    ],
-  });
+  const selectedMode = await promptProvider.selectMode();
 
-  if (p.isCancel(selectedMode)) {
-    p.cancel('Setup cancelled');
+  if (promptProvider.isCancel(selectedMode)) {
+    promptProvider.cancel('Setup cancelled');
     process.exit(0);
   }
 
@@ -151,7 +141,7 @@ async function main() {
   await configManager.save(selectedVersion, selectedMode, typeDefsVersion);
   console.log('✓ Configuration saved to p5-config.json');
 
-  p.outro('Setup complete! Run "npm run serve" to start coding.');
+  promptProvider.outro('Setup complete! Run "npm run serve" to start coding.');
 }
 
 main().catch(console.error);

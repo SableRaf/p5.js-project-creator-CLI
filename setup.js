@@ -48,6 +48,26 @@ async function downloadP5(version) {
   console.log(`✓ Downloaded p5.js ${version} to lib/p5.js`);
 }
 
+async function downloadTypes(version) {
+  // Create types directory if it doesn't exist
+  try {
+    await mkdir('types', { recursive: true });
+  } catch (error) {
+    // Directory already exists, ignore
+  }
+
+  // Download @types/p5 from jsdelivr CDN
+  // For now, use the version as-is (will add fallback in next commit)
+  const url = `https://cdn.jsdelivr.net/npm/@types/p5@${version}/index.d.ts`;
+  const response = await fetch(url);
+  const typeDefs = await response.text();
+
+  // Save to types/global.d.ts
+  await writeFile('types/global.d.ts', typeDefs, 'utf-8');
+
+  console.log(`✓ Downloaded type definitions to types/global.d.ts`);
+}
+
 async function saveConfig(version, mode = 'cdn') {
   // Create configuration object
   const config = {
@@ -144,6 +164,9 @@ async function main() {
   if (selectedMode === 'local') {
     await downloadP5(selectedVersion);
   }
+
+  // Download type definitions
+  await downloadTypes(selectedVersion);
 
   await updateHTML(selectedVersion, selectedMode);
   await saveConfig(selectedVersion, selectedMode);

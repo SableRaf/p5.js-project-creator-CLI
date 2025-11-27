@@ -12,8 +12,8 @@ export class HTMLManager {
     /^https?:\/\/cdn\.jsdelivr\.net\/npm\/p5@([^/]+)\/lib\/p5\.(min\.)?js$/,
     /^https?:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/p5\.js\/([^/]+)\/p5\.(?:min\.)?js$/,
     /^https?:\/\/unpkg\.com\/p5@([^/]+)\/lib\/p5\.(min\.)?js$/,
-    /^sketch\/lib\/p5(?:@([^/]+))?\.(min\.)?js$/,
-    /^lib\/p5(?:@([^/]+))?\.(min\.)?js$/
+    /^\.?\/?\bsketch\/lib\/p5(?:@([^/]+))?\.(min\.)?js$/,
+    /^\.?\/?\blib\/p5(?:@([^/]+))?\.(min\.)?js$/
   ];
 
   /**
@@ -66,7 +66,7 @@ export class HTMLManager {
     const file = preferences.isMinified ? 'p5.min.js' : 'p5.js';
 
     if (mode === 'local') {
-      return `${basePath}lib/${file}`;
+      return `/lib/${file}`;
     }
 
     const cdn = preferences.cdnProvider || 'jsdelivr';

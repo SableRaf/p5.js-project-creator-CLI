@@ -2,15 +2,6 @@
 
 A beautiful, interactive CLI tool for creating and managing p5.js projects with automatic version management and TypeScript IntelliSense support.
 
-## Features
-
-- 🎨 **Interactive Setup**: Beautiful TUI powered by @clack/prompts
-- 📦 **Version Management**: Choose from 155+ p5.js versions via jsdelivr API
-- 🚀 **Dual Delivery Modes**: CDN or local file download
-- 💡 **TypeScript Support**: Automatic type definitions with IntelliSense
-- ⚙️ **Configuration Persistence**: Remembers your choices between runs
-- 🏗️ **Clean Architecture**: Modular, testable, extensible codebase
-
 ## Quick Start
 
 ```bash
@@ -52,29 +43,33 @@ Run `npm run update` anytime to:
 
 The tool will show your current configuration and ask if you want to change it.
 
+#### Switching from Local to CDN
+
+If you switch from Local to CDN mode, the CLI will ask if you want to delete the local copy of p5.js to save space.
+
 ## Project Structure
 
 ```
 .
-├── sketch/
-│   ├── index.html               # Main HTML file
-│   ├── sketch.js                # Your p5.js sketch
-│   ├── style.css                # Styles
-│   ├── jsconfig.json            # IntelliSense configuration
-│   ├── p5-config.json           # Project configuration
+├── sketch/                       # Your p5.js project folder (will be created by setup.js)
+│   ├── index.html                # Main HTML file
+│   ├── sketch.js                 # Your p5.js sketch
+│   ├── style.css                 # Styles
+│   ├── jsconfig.json             # IntelliSense configuration
+│   ├── p5-config.json            # Project configuration (auto-generated)
 │   └── types/
-│       └── global.d.ts          # TypeScript definitions
+│       └── p5.js@<version>.d.ts  # TypeScript definitions
 ├── src/
 │   ├── api/
-│   │   └── VersionProvider.js   # Fetches versions from jsdelivr
+│   │   └── VersionProvider.js    # Fetches versions from jsdelivr
 │   ├── config/
-│   │   └── ConfigManager.js     # Manages p5-config.json
+│   │   └── ConfigManager.js      # Manages p5-config.json
 │   ├── file/
-│   │   ├── FileManager.js       # Handles file operations
-│   │   └── HTMLManager.js       # Handles HTML manipulation
+│   │   ├── FileManager.js        # Handles file operations
+│   │   └── HTMLManager.js        # Handles HTML manipulation
 │   └── ui/
-│       └── PromptProvider.js    # Interactive prompts
-├── setup.js                     # Setup script entry point
+│       └── PromptProvider.js     # Interactive prompts
+├── setup.js                      # Setup script entry point
 ├── package.json
 └── README.md
 ```
@@ -94,113 +89,39 @@ The tool will show your current configuration and ask if you want to change it.
 
 ## TypeScript IntelliSense
 
-Type definitions are automatically downloaded and configured in `jsconfig.json`. This gives you:
+Type definitions are automatically downloaded to the `sketch/types/` directory.
+
+This gives you:
 
 - Auto-completion for p5.js functions
 - Inline documentation
 - Type checking in VS Code
 
-No additional configuration needed!
+This is defined in `sketch/jsconfig.json` (created automatically on setup).
 
-## Architecture
-
-This project follows clean architecture principles:
-
-- **Program Against Interfaces**: Each module has a clear contract
-- **DRY**: No code duplication, single source of truth
-- **Separation of Concerns**: Each layer has one responsibility
-  - `api/`: Version fetching and API calls
-  - `config/`: Configuration management
-  - `file/`: File system operations
-  - `ui/`: User interaction prompts
-
-### Extensibility
-
-The modular design makes it easy to:
-
-- Add new version providers (NPM, GitHub, etc.)
-- Swap UI frameworks (replace PromptProvider)
-- Support different project types (TypeScript, instance mode)
-- Add new delivery modes or features
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run setup
-node setup.js
-
-# Test with different versions
-npm run update
+```json
+{
+  "compilerOptions": {
+    "target": "ES6"
+  },
+  "include": [
+    "*.js",
+    "types/*.d.ts"
+  ]
+}
 ```
 
 ## Requirements
 
 - Node.js 18+ (uses native fetch API)
 
-## How It Works
-
-1. **Setup**: Runs `setup.js` which orchestrates the entire process
-2. **Version Fetching**: VersionProvider queries jsdelivr API
-3. **User Input**: PromptProvider collects version and mode preferences
-4. **File Operations**: FileManager updates HTML and downloads files
-5. **Type Definitions**: Automatically matches or falls back to latest
-6. **Configuration**: ConfigManager saves settings for next time
-
-## CDN vs Local Mode
-
-### CDN Mode (Default)
-
-**Pros:**
-- Faster setup
-- Smaller project size
-- Automatic caching by browsers
-
-**Cons:**
-- Requires internet connection
-- Subject to CDN availability
-
-**HTML Output:**
-```html
-<script src="https://cdn.jsdelivr.net/npm/p5@2.1.1/lib/p5.js"></script>
-```
-
-### Local Mode
-
-**Pros:**
-- Works offline
-- Full control over p5.js file
-- No external dependencies
-
-**Cons:**
-- Larger project size
-- Manual updates needed
-
-**HTML Output:**
-```html
-<script src="lib/p5.js"></script>
-```
-
-## Troubleshooting
-
-### Type definitions not found for version X
-
-The tool automatically falls back to the latest @types/p5 version if an exact match isn't found. This is normal and doesn't affect functionality.
-
-### Setup cancelled or failed
-
-Check your internet connection and try again. The tool requires access to:
-- `https://data.jsdelivr.com` (version API)
-- `https://cdn.jsdelivr.net` (file downloads)
-
 ## License
 
-This project template is provided as-is for educational and development purposes.
+This project is licensed under the LGPL-2.1 License.
 
 ## Credits
 
 - Built with [@clack/prompts](https://www.npmjs.com/package/@clack/prompts)
 - p5.js from [p5js.org](https://p5js.org/)
-- Type definitions from [@types/p5](https://www.npmjs.com/package/@types/p5)
+- Official type definitions on jsdelivr: [@types/p5](https://www.jsdelivr.com/package/npm/@types/p5)
+- Inspired by the p5.js community and contributors (special thanks to Dave Pagurek and Neill Bogie)

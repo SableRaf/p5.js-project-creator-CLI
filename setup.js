@@ -44,12 +44,35 @@ async function downloadP5(version, verbose = false) {
   }
 }
 
+// Delete existing p5.js type definition files matching p5.js.*.d.ts in the types directory
+async function deleteExistingTypeDefinitions(basePath, verbose = false) {
+  const typesDir = `${basePath}types`;
+  const typesExist = await fileManager.exists(typesDir);
+  if (typesExist) {
+    const typeFiles = await fileManager.listDir(typesDir);
+    for (const file of typeFiles) {
+      if (/^p5\.js.*\.d\.ts$/.test(file)) {
+        const filePath = `${typesDir}/${file}`;
+        const deleted = await fileManager.deleteFile(filePath);
+        if (verbose) {
+          if (deleted) console.log(`✓ Deleted existing type definition \`${filePath}\``);
+          else console.warn(`⚠ Could not delete existing type definition \`${filePath}\``);
+        }
+      }
+    }
+  }
+}
+
+// Example format for URL:
+// https://cdn.jsdelivr.net/npm/p5@2.1.1/types/global.d.ts
+// Fall back to latest if specific version not found:
+// https://cdn.jsdelivr.net/npm/p5@latest/types/global.d.ts
 async function downloadTypes(version, verbose = false) {
   // Create types directory if it doesn't exist
   await fileManager.createDir(`${basePath}types`);
 
-  // Try to download @types/p5 matching the p5.js version
-  let url = `https://cdn.jsdelivr.net/npm/@types/p5@${version}/global.d.ts`;
+  // Try to download p5 type definitions matching the p5.js version
+  let url = `https://cdn.jsdelivr.net/npm/p5@${version}/types/global.d.ts`;
   let response = await fileManager.downloadFileWithCheck(url);
   let typeDefsVersion = version;
 
@@ -58,20 +81,20 @@ async function downloadTypes(version, verbose = false) {
     if (verbose) {
       console.log(`Type definitions for version ${version} not found, using latest...`);
     }
-    // Fetch latest version of @types/p5
-    typeDefsVersion = await versionProvider.getLatestForPackage('@types/p5');
+    // Fetch latest version of p5
+    typeDefsVersion = await versionProvider.getLatestForPackage('p5');
     // Download latest version
-    url = `https://cdn.jsdelivr.net/npm/@types/p5@${typeDefsVersion}/global.d.ts`;
+    url = `https://cdn.jsdelivr.net/npm/p5@${typeDefsVersion}/types/global.d.ts`;
     response = await fileManager.downloadFileWithCheck(url);
   }
 
   const typeDefs = await response.text();
 
   // Save to types/global.d.ts
-  await fileManager.writeHTML(`${basePath}types/global@${typeDefsVersion}.d.ts`, typeDefs);
+  await fileManager.writeHTML(`${basePath}types/p5.js@${typeDefsVersion}.d.ts`, typeDefs);
 
   if (verbose) {
-    console.log(`✓ Downloaded type definitions (${typeDefsVersion}) to types/global.d.ts`);
+    console.log(`✓ Downloaded type definitions (${typeDefsVersion}) to types/p5.js@${typeDefsVersion}.d.ts`);
   }
 
   return typeDefsVersion;
@@ -207,6 +230,9 @@ async function main() {
   if (selectedMode === 'local') {
     await downloadP5(selectedVersion, verbose);
   }
+
+  // Delete existing p5.js type definitions before downloading new ones
+  await deleteExistingTypeDefinitions(basePath, verbose);
 
   // Download type definitions (returns actual version downloaded)
   const typeDefsVersion = await downloadTypes(selectedVersion, verbose);

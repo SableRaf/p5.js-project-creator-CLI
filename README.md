@@ -1,4 +1,7 @@
-# p5.js Project Setup
+>[!IMPORTANT]
+> This is a proof of concept and is not intended for production use. All of the code and most of the documentation was written by Claude Code. Please take this into consideration when evaluating the project.
+
+# p5.js Project Creator CLI
 
 A beautiful, interactive CLI tool for creating and managing p5.js projects with automatic version management and TypeScript IntelliSense support.
 

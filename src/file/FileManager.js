@@ -6,21 +6,28 @@ const basePath = 'sketch/';
 
 export class FileManager {
   /**
-   * Read HTML file content
+   * Reads HTML file content from the specified path
+   * @param {string} [path='sketch/index.html'] - The path to the HTML file
+   * @returns {Promise<string>} The file content as a string
    */
   async readHTML(path = `${basePath}index.html`) {
     return await readFile(path, 'utf-8');
   }
 
   /**
-   * Write HTML file content
+   * Writes HTML content to the specified path
+   * @param {string} [path='sketch/index.html'] - The path where the file should be written
+   * @param {string} content - The HTML content to write
+   * @returns {Promise<void>}
    */
   async writeHTML(path = `${basePath}index.html`, content) {
     await writeFile(path, content, 'utf-8');
   }
 
   /**
-   * Create directory (recursive)
+   * Creates a directory recursively (creates parent directories if needed)
+   * @param {string} path - The directory path to create
+   * @returns {Promise<void>}
    */
   async createDir(path) {
     try {
@@ -31,7 +38,9 @@ export class FileManager {
   }
 
   /**
-   * Check if a file or directory exists
+   * Checks if a file or directory exists at the specified path
+   * @param {string} path - The path to check
+   * @returns {Promise<boolean>} True if the path exists, false otherwise
    */
   async exists(path) {
     try {
@@ -43,7 +52,9 @@ export class FileManager {
   }
 
   /**
-   * List directory contents (names)
+   * Lists the contents of a directory (file and folder names)
+   * @param {string} path - The directory path to list
+   * @returns {Promise<string[]>} Array of file/folder names, or empty array if directory doesn't exist
    */
   async listDir(path) {
     try {
@@ -54,7 +65,9 @@ export class FileManager {
   }
 
   /**
-   * Delete a file
+   * Deletes a file at the specified path
+   * @param {string} path - The file path to delete
+   * @returns {Promise<boolean>} True if deletion succeeded, false otherwise
    */
   async deleteFile(path) {
     try {
@@ -66,7 +79,9 @@ export class FileManager {
   }
 
   /**
-   * Delete a directory (recursively)
+   * Deletes a directory and all its contents recursively
+   * @param {string} path - The directory path to delete
+   * @returns {Promise<boolean>} True if deletion succeeded, false otherwise
    */
   async deleteDir(path) {
     try {
@@ -78,7 +93,10 @@ export class FileManager {
   }
 
   /**
-   * Download file from URL and save to path
+   * Downloads a file from a URL and saves it to the specified path
+   * @param {string} url - The URL to download from
+   * @param {string} targetPath - The local path where the file should be saved
+   * @returns {Promise<string>} The downloaded content as a string
    */
   async downloadFile(url, targetPath) {
     const response = await fetch(url);
@@ -88,7 +106,9 @@ export class FileManager {
   }
 
   /**
-   * Download file from URL with response status check
+   * Downloads a file from a URL and returns the response with status check
+   * @param {string} url - The URL to download from
+   * @returns {Promise<{ok: boolean, text: Function}>} Object with ok status and text() method to get content
    */
   async downloadFileWithCheck(url) {
     const response = await fetch(url);
@@ -99,14 +119,19 @@ export class FileManager {
   }
 
   /**
-   * Write JSON file
+   * Writes a JavaScript object as formatted JSON to a file
+   * @param {string} path - The file path to write to
+   * @param {Object} data - The data object to serialize as JSON
+   * @returns {Promise<void>}
    */
   async writeJSON(path, data) {
     await writeFile(path, JSON.stringify(data, null, 2), 'utf-8');
   }
 
   /**
-   * Read JSON file
+   * Reads and parses a JSON file
+   * @param {string} path - The JSON file path to read
+   * @returns {Promise<Object>} The parsed JSON object
    */
   async readJSON(path) {
     const content = await readFile(path, 'utf-8');

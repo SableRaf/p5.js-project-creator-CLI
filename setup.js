@@ -19,6 +19,10 @@ const basePath = 'sketch/';
 const verbose = process.argv.includes('--verbose') || 
                 process.env.npm_config_verbose === 'true';
 
+/**
+ * Fetches all available p5.js versions from the jsdelivr API
+ * @returns {Promise<string[]>} Array of version strings sorted by release date (newest first)
+ */
 async function fetchVersions() {
   // Fetch available p5.js versions from API
   const versions = await versionProvider.getVersions();
@@ -31,6 +35,12 @@ async function fetchVersions() {
   return versions;
 }
 
+/**
+ * Downloads the specified version of p5.js from jsdelivr CDN to the local lib directory
+ * @param {string} version - The p5.js version to download (e.g., "2.1.0")
+ * @param {boolean} [verbose=false] - Whether to log verbose output
+ * @returns {Promise<void>}
+ */
 async function downloadP5(version, verbose = false) {
   // Create lib directory if it doesn't exist
   await fileManager.createDir(`${basePath}lib`);
@@ -44,7 +54,12 @@ async function downloadP5(version, verbose = false) {
   }
 }
 
-// Delete existing p5.js type definition files matching p5.js.*.d.ts in the types directory
+/**
+ * Deletes existing p5.js type definition files matching the pattern p5.js.*.d.ts in the types directory
+ * @param {string} basePath - The base path where the types directory is located
+ * @param {boolean} [verbose=false] - Whether to log verbose output
+ * @returns {Promise<void>}
+ */
 async function deleteExistingTypeDefinitions(basePath, verbose = false) {
   const typesDir = `${basePath}types`;
   const typesExist = await fileManager.exists(typesDir);
@@ -63,10 +78,16 @@ async function deleteExistingTypeDefinitions(basePath, verbose = false) {
   }
 }
 
-// Example format for URL:
-// https://cdn.jsdelivr.net/npm/p5@2.1.1/types/global.d.ts
-// Fall back to latest if specific version not found:
-// https://cdn.jsdelivr.net/npm/p5@latest/types/global.d.ts
+/**
+ * Downloads TypeScript type definitions for p5.js from jsdelivr CDN.
+ * Falls back to the latest version if the specified version's types are not found.
+ * Example URL format: https://cdn.jsdelivr.net/npm/p5@2.1.1/types/global.d.ts
+ * Fallback: https://cdn.jsdelivr.net/npm/p5@latest/types/global.d.ts
+ *
+ * @param {string} version - The p5.js version to download type definitions for
+ * @param {boolean} [verbose=false] - Whether to log verbose output
+ * @returns {Promise<string>} The actual version of the type definitions that were downloaded
+ */
 async function downloadTypes(version, verbose = false) {
   // Create types directory if it doesn't exist
   await fileManager.createDir(`${basePath}types`);
@@ -100,6 +121,13 @@ async function downloadTypes(version, verbose = false) {
   return typeDefsVersion;
 }
 
+/**
+ * Updates the index.html file to use the specified p5.js version and delivery mode
+ * @param {string} version - The p5.js version to use (e.g., "2.1.0")
+ * @param {string} mode - The delivery mode: "cdn" or "local"
+ * @param {boolean} [verbose=false] - Whether to log verbose output
+ * @returns {Promise<void>}
+ */
 async function updateHTML(version, mode, verbose = false) {
   // Read index.html
   const htmlContent = await fileManager.readHTML();
@@ -122,6 +150,19 @@ async function updateHTML(version, mode, verbose = false) {
   }
 }
 
+/**
+ * Main entry point for the p5.js project setup CLI.
+ * Orchestrates the interactive setup process including:
+ * - Creating required project structure and files
+ * - Loading existing configuration if available
+ * - Prompting user for version and delivery mode selection
+ * - Downloading p5.js library (if local mode)
+ * - Downloading TypeScript type definitions
+ * - Updating HTML file with selected configuration
+ * - Saving configuration for future reference
+ *
+ * @returns {Promise<void>}
+ */
 async function main() {
     // Ensure sketch directory and required files exist
     await fileManager.createDir(basePath);

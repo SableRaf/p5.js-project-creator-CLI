@@ -4,14 +4,19 @@ import { access } from 'fs/promises';
 const basePath = 'sketch/';
 
 export class ConfigManager {
+  /**
+   * Creates a new ConfigManager instance
+   * @param {FileManager} fileManager - The file manager instance for file operations
+   * @param {string} [configPath='sketch/p5-config.json'] - Path to the configuration file
+   */
   constructor(fileManager, configPath = `${basePath}p5-config.json`) {
     this.fileManager = fileManager;
     this.configPath = configPath;
   }
 
   /**
-   * Load configuration from file
-   * Returns null if config doesn't exist
+   * Loads configuration from file
+   * @returns {Promise<Object|null>} The configuration object with {version, mode, typeDefsVersion, lastUpdated} or null if config doesn't exist
    */
   async load() {
     try {
@@ -24,7 +29,11 @@ export class ConfigManager {
   }
 
   /**
-   * Save configuration to file
+   * Saves configuration to file
+   * @param {string} version - The p5.js version to save
+   * @param {string} [mode='cdn'] - The delivery mode: "cdn" or "local"
+   * @param {string|null} [typeDefsVersion=null] - The version of type definitions downloaded
+   * @returns {Promise<void>}
    */
   async save(version, mode = 'cdn', typeDefsVersion = null) {
     const config = {
@@ -38,7 +47,8 @@ export class ConfigManager {
   }
 
   /**
-   * Get default configuration
+   * Gets the default configuration object
+   * @returns {Object} Default configuration with {version: 'latest', mode: 'cdn', typeDefsVersion: null, lastUpdated: ISO timestamp}
    */
   getDefault() {
     return {
